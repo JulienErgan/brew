@@ -22,9 +22,9 @@ module Homebrew
         may be appended to the command. When given multiple formula arguments,
         show the intersection of dependencies for each formula.
       EOS
-      switch "-n",
+      switch "--topological", "-n",
              description: "Sort dependencies in topological order."
-      switch "--1",
+      switch "--skip-recursion", "--1",
              description: "Only show dependencies one level down, instead of recursing."
       switch "--union",
              description: "Show the union of dependencies for multiple <formula>, instead of the intersection."
@@ -81,7 +81,7 @@ module Homebrew
 
     Formulary.enable_factory_cache!
 
-    recursive = !args.send(:"1?")
+    recursive = !args.skip_recursion?
     installed = args.installed? || dependents(args.named.to_formulae_and_casks).all?(&:any_version_installed?)
 
     @use_runtime_dependencies = installed && recursive &&
@@ -149,7 +149,7 @@ module Homebrew
     condense_requirements(all_deps, args: args)
     all_deps.map! { |d| dep_display_name(d, args: args) }
     all_deps.uniq!
-    all_deps.sort! unless args.n?
+    all_deps.sort! unless args.topological?
     puts all_deps
   end
 
